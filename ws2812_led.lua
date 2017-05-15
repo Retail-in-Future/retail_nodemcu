@@ -1,74 +1,63 @@
 
-ws2812_led = {}
+-- ws2812 module
+local M, module = {}, ...
+_G[module] = M
 
-    local green_timer = nil
-    local red_timer = nil
+local green_timer, red_timer = nil, nil
 
-    -- Turn on the green led
-    function ws2812_led.turn_on_green()
-
-        -- turn off the red led first if it is open
-        if nil ~= red_timer then
-            tmr.unregister(red_timer)
-            red_timer = nil
-        end
-
-        -- turn on the green led
-        ws2812.init(ws2812.MODE_SINGLE)
-        ws2812.write(string.char(255,0,0, 255,0,0, 255,0,0, 255,0,0))
-        
-        green_timer = tmr.create()
-        
-        if nil == green_timer then
-            print("create ws2812 timer fail")
-        else
-            tmr.register(green_timer, 5000, tmr.ALARM_SINGLE, function ()
-                -- body
-                ws2812.write(string.char(0,0,0, 0,0,0, 0,0,0, 0,0,0))
-            end)
-
-            -- start timer 
-            if true == tmr.start(green_timer) then
-                print("start green_timer succ")
-            else
-                tmr.unregister(green_timer)
-                green_timer = nil
-                print("start green_timer fail")
-            end
-        end
-    end
-
-    function ws2812_led.turn_on_red()
-        -- body
-        -- turn off the green led first if it is open
-        if nil ~= green_timer then
-            tmr.unregister(green_timer)
+local function clean_timer(  )
+    -- body
+    if green_timer and tmr.state(green_timer) then
+        tmr.unregister(green_timer)
             green_timer = nil
-        end
-
-        -- turn on the red led
-        ws2812.init(ws2812.MODE_SINGLE)
-        ws2812.write(string.char(0,255,0, 0,255,0, 0,255,0, 0,255,0))
-        
-        red_timer = tmr.create()
-        
-        if nil == red_timer then
-            print("create ws2812 timer fail")
-        else
-            tmr.register(red_timer, 5000, tmr.ALARM_SINGLE, function ()
-                -- body
-                ws2812.write(string.char(0,0,0, 0,0,0, 0,0,0, 0,0,0))
-            end)
-
-            -- start timer 
-            if true == tmr.start(red_timer) then
-                print("start red_timer succ")
-            else
-                tmr.unregister(red_timer)
-                red_timer = nil
-                print("start red_timer fail")
-            end
-        end
     end
 
-return ws2812_led
+    if red_timer and tmr.state(red_timer) then
+        tmr.unregister(red_timer)
+            red_timer = nil
+    end
+end
+
+function M:turn_on_green(time_in_s)
+    -- body
+    -- turn on the green led
+    ws2812.init(ws2812.MODE_SINGLE)
+    ws2812.write(string.char(255,0,0, 255,0,0, 255,0,0, 255,0,0))
+
+    clean_timer()
+    green_timer = tmr.create()
+    tmr.register(green_timer, time_in_s * 1000, tmr.ALARM_SINGLE, function ()
+        -- body
+        ws2812.write(string.char(0,0,0, 0,0,0, 0,0,0, 0,0,0))
+    end)
+
+    -- start timer
+    if false == tmr.start(green_timer) then
+        tmr.unregister(green_timer)
+        green_timer = nil
+        log2file:print("start green_timer timer fail")
+    end
+end
+
+function M:turn_on_red(time_in_s)
+    -- body
+    -- turn on the green led
+    ws2812.init(ws2812.MODE_SINGLE)
+    ws2812.write(string.char(0,255,0, 0,255,0, 0,255,0, 0,255,0))
+
+    clean_timer()
+    red_timer = tmr.create()
+    tmr.register(red_timer, time_in_s * 1000, tmr.ALARM_SINGLE, function ()
+        -- body
+        ws2812.write(string.char(0,0,0, 0,0,0, 0,0,0, 0,0,0))
+    end)
+
+    -- start timer
+    if false == tmr.start(red_timer) then
+        tmr.unregister(red_timer)
+        red_timer = nil
+        log2file:print("start red_timer timer fail")
+    end
+end
+
+return M
