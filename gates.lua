@@ -3,7 +3,7 @@
 local M, module = {}, ...
 _G[module] = M
 
-local simulate = require("ws2812_led")
+local simulate = require("ws2812")
 
 function M:allow_enter()
     -- body

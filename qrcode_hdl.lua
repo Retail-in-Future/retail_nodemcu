@@ -1,5 +1,5 @@
 
--- qr_scanner module 0--0
+-- qrcode_hdl module
 local M, module = {}, ...
 _G[module] = M
 
@@ -12,6 +12,7 @@ function M:register_qrcode_hdl(server_ip, port)
     tmr.register(buffer_timer, 2000, tmr.ALARM_SEMI, function ()
         if "" ~= buf then
             udpSocket:send(port, server_ip, buf)
+            mqtt_client:publish("/qr_code", buf, 0, 0)
             buf = ""
         end
     end)
@@ -21,16 +22,17 @@ function M:register_qrcode_hdl(server_ip, port)
     gpio.mode(pin_interrupt, gpio.INT)
     
     local uart_mod_flag = 0
-    local function on_low_level_cb()
+    local function on_flash_button_click_cb()
 
         -- eliminate jitter
         gpio.trig(pin_interrupt)
         tmr.alarm(0, 500, tmr.ALARM_SINGLE, function ()
-            gpio.trig(pin_interrupt, "low", on_low_level_cb)
+            gpio.trig(pin_interrupt, "up", on_flash_button_click_cb)
         end)
 
         if 0 == uart_mod_flag then
             uart_mod_flag = 1
+            led:stop_debug_led()
             
             uart.setup(0, 9600, 0, uart.PARITY_NONE, uart.STOPBITS_1, 0)
             uart.on("data", 0, function (data)
@@ -45,13 +47,14 @@ function M:register_qrcode_hdl(server_ip, port)
             end, 0)
         else
             uart_mod_flag = 0
+            led:start_debug_led()
 
             uart.setup(0, 9600, 0, uart.PARITY_NONE, uart.STOPBITS_1, 1)
             uart.on("data")
         end
     end
 
-    gpio.trig(pin_interrupt, "low", on_low_level_cb)
+    gpio.trig(pin_interrupt, "up", on_flash_button_click_cb)
 
 end
 
