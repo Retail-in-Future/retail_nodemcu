@@ -1,29 +1,45 @@
--- connect to wifi ap
-local wifi_mod = require("conn2ap")
-wifi_mod:connect_wifi("TPLINK-7d99re", "vnmg-w43b-4b8n")
---wifi_mod:connect_wifi("twguest", "begin hark sauce editor sign")
 
--- open log (global variable )
-log2file = require("log2file")
-log2file:open_log()
+local config = require("config")
 
--- test log2file
--- local test_log2file = require("test_log2file")
--- test_log2file:test()
+-- log
+local log_mod = require("log_mod")
+log_mod:init_mod()
 
--- start up led
-led = require("led")
-led:start_working_led()
-led:start_debug_led()
+-- wifi
+local wifi_mod = require("wifi_mod")
+wifi_mod:start()
 
--- init mqtt client
-mqtt_client = require("mqtt_client")
-mqtt_client:connect("192.168.1.105", 1883)
+-- tcp server
+local tcp_mod = require("tcp_mod")
+tcp_mod:start()
 
--- start up gates
-gates = require("gates")
+-- gates
+local gates_mod = require("gates_mod")
+gates_mod:init_mod()
 
--- start up qr scanner
-local qr_scanner = require("qr_scanner")
-qr_scanner:register_qrcode_hdl("192.168.1.105", 1234)
+-- qr scanner
+local qrcode_mod = require("qrcode_mod")
+qrcode_mod:start()
 
+function test()
+    -- body
+    if true ~= check_wifi() then
+        print("check wifi fail .. .")
+    end
+
+    if true ~= check_log() then
+        print("check log fail .. .")
+    end
+
+    if true ~= check_tcp() then
+        print("check tcp fail .. .")
+    end
+
+    if true ~= check_qrcode() then
+        print("check qrcode fail .. .")
+    end
+
+    if true ~= check_gates() then
+        print("check gates fail .. .")
+    end
+end
