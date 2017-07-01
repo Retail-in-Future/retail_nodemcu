@@ -16,51 +16,45 @@ end
 
 function M:start()
     -- body
+    -- register reconnect timer
+    reconnect_timer = tmr.create()
+    tmr.register(reconnect_timer, 3000, tmr.ALARM_SEMI, function()
+        log_mod:print("timer out. reconect to server".. config.tcp_server_ip)
+        tcp_cli:connect(config.tcp_server_port, config.tcp_server_ip)
+    end)
+
     tcp_cli = net.createConnection(net.TCP, 0)
 
     tcp_cli:on("receive", function( sck, c )
         -- body
         log_mod:print("tcp r data: " .. c)
-
-        -- send to gate
+        -- tmr.stop(reconnect_timer)
+        b_connected = true
         r_data_cb(c)
     end)
     tcp_cli:on("connection", function( sck, c )
         -- body
         log_mod:print("connect to tcp server succ")
+        -- tmr.stop(reconnect_timer)
         b_connected = true
     end)
     tcp_cli:on("reconnection", function( sck, c )
         -- body
-        log_mod:print("reconnect to tcp server succ")
-        b_connected = true
+        log_mod:print("reconnect to server")
+        -- tmr.stop(reconnect_timer)
+        tmr.start(reconnect_timer)
+        b_connected = false
     end)
     tcp_cli:on("disconnection", function( sck, c )
         -- body
-        log_mod:print("disconnect to tcp server")
+        log_mod:print("disconnect to server:" .. c)
+        -- tmr.stop(reconnect_timer)
+        tmr.start(reconnect_timer)
         b_connected = false
-
-        -- reconnect to tcp server
-        tcp_cli:connect(server_port, server_ip)
     end)
 
-    tcp_cli:connect(server_port, server_ip)
-
-    -- register reconnect timer
-    reconnect_timer = tmr.create()
-    tmr.register(reconnect_timer, 5000, tmr.ALARM_AUTO, function()
-        -- body
-        if false == b_connected then
-            log_mod:connect(server_port, server_ip)
-        end
-    end)
-
-    -- start timer  
-    if false == tmr.start(reconnect_timer) then
-        tmr.unregister(reconnect_timer)
-        reconnect_timer = nil
-        log2file:print("start reconnect timer fail")
-    end
+    -- tmr.start(reconnect_timer)
+    tcp_cli:connect(config.tcp_server_port, config.tcp_server_ip)
 end
 
 function M:send(buf)
@@ -72,7 +66,7 @@ end
 
 function check_tcp()
     -- body
-    return b_connected
+    return true == b_connected
 end
 
 return M

@@ -15,20 +15,22 @@ local function on_flash_button_click_cb()
 
     -- register reset timer
     reset_timer = tmr.create()
-    tmr.register(jitter_timer, 1000, tmr.ALARM_SINGLE, function ()
+    tmr.register(reset_timer, 1000, tmr.ALARM_SINGLE, function ()
         gpio.trig(pin_interrupt, "up", on_flash_button_click_cb)
     end)
 
     -- start reset timer  
-    if false == tmr.start(jitter_timer) then
-        tmr.unregister(jitter_timer)
-        jitter_timer = nil
-        log2file:print("start reconnect timer fail")
+    if false == tmr.start(reset_timer) then
+        tmr.unregister(reset_timer)
+        reset_timer = nil
+        log_mod:print("start reconnect timer fail")
     end
+
+    log_mod:print("r button click evt")
 
     -- add a timer for get a complete qrcode
     buf = ""
-    local buffer_timer = tmr.create()
+    buffer_timer = tmr.create()
     tmr.register(buffer_timer, 2000, tmr.ALARM_SEMI, function ()
         if "" ~= buf then
             tmp_tbl = {}
@@ -46,13 +48,13 @@ local function on_flash_button_click_cb()
 
     if 0 == uart_mod_flag then
         uart_mod_flag = 1
-        led:stop_debug_led()
+        led_mod:stop_debug_led()
 
         log_mod:print("turn to run_mod")
         
         uart.setup(0, 9600, 0, uart.PARITY_NONE, uart.STOPBITS_1, 0)
         uart.on("data", 0, function (data)
-            local running, mode = buffer_timer:state()
+            running, mode = buffer_timer:state()
             
             if running then
                 tmr.stop(buffer_timer)
@@ -63,7 +65,7 @@ local function on_flash_button_click_cb()
         end, 0)
     else
         uart_mod_flag = 0
-        led:start_debug_led()
+        led_mod:start_debug_led()
 
         log_mod:print("turn to debug_mod")
 

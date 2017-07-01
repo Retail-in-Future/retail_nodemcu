@@ -1,45 +1,50 @@
-
-local config = require("config")
+-- wifi
+local wifi_mod = require("wifi_mod")
+wifi_mod:start()
 
 -- log
 local log_mod = require("log_mod")
 log_mod:init_mod()
 
--- wifi
-local wifi_mod = require("wifi_mod")
-wifi_mod:start()
+log_mod:print("init log mod")
 
 -- tcp server
 local tcp_mod = require("tcp_mod")
 tcp_mod:start()
 
+log_mod:print("start tcp")
+
 -- gates
 local gates_mod = require("gates_mod")
 gates_mod:init_mod()
+
+log_mod:print("start gates")
 
 -- qr scanner
 local qrcode_mod = require("qrcode_mod")
 qrcode_mod:start()
 
+log_mod:print("start qrcode")
+
 function test()
     -- body
     if true ~= check_wifi() then
-        print("check wifi fail .. .")
+        log_mod:print("check wifi fail .. .")
     end
 
     if true ~= check_log() then
-        print("check log fail .. .")
+        log_mod:print("check log fail .. .")
     end
 
     if true ~= check_tcp() then
-        print("check tcp fail .. .")
+        log_mod:print("check tcp fail .. .")
     end
 
     if true ~= check_qrcode() then
-        print("check qrcode fail .. .")
+        log_mod:print("check qrcode fail .. .")
     end
 
     if true ~= check_gates() then
-        print("check gates fail .. .")
+        log_mod:print("check gates fail .. .")
     end
 end

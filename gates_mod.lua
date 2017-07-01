@@ -15,8 +15,9 @@ local function reset_gate()
     ws2812.write(string.char(0,0,0, 0,0,0, 0,0,0, 0,0,0))
 end
 
-local function start_timer()
+local function start_timer(time_in_s)
     -- body
+    gate_timer = tmr.create()
     tmr.register(gate_timer, time_in_s * 1000, tmr.ALARM_SINGLE, function ()
         -- body
         reset_gate()
