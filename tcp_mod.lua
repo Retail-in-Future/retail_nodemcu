@@ -3,14 +3,13 @@
 local M, module = {}, ...
 _G[module] = M
 
-local config = require("config")
-local log_mod = require("log_mod")
-local gates_mod = require("gates_mod")
 
 local tcp_cli = nil
 local b_connected = false
+local snd_flag = true
 
 local function r_data_cb(data)
+    log_mod:print("r data" .. data)
     gates_mod:cmd_proc(data)
 end
 
@@ -52,6 +51,10 @@ function M:start()
         tmr.start(reconnect_timer)
         b_connected = false
     end)
+    tcp_cli:on("sent", function( sck, c )
+        -- body
+        snd_flag = true
+    end)
 
     -- tmr.start(reconnect_timer)
     tcp_cli:connect(config.tcp_server_port, config.tcp_server_ip)
@@ -60,7 +63,11 @@ end
 function M:send(buf)
     -- body
     if b_connected then
-        tcp_cli:send(buf)
+        --tcp_cli:send(buf)
+        if true == snd_flag then
+            tcp_cli:send(buf)
+            snd_flag = false
+        end
     end
 end
 

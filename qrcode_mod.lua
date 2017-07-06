@@ -3,9 +3,6 @@
 local M, module = {}, ...
 _G[module] = M
 
-local led_mod = require("led_mod")
-local tcp_mod = require("tcp_mod")
-local log_mod = require("log_mod")
 
 local pin_interrupt = 3
 local uart_mod_flag = 0
@@ -33,16 +30,18 @@ local function on_flash_button_click_cb()
     buffer_timer = tmr.create()
     tmr.register(buffer_timer, 2000, tmr.ALARM_SEMI, function ()
         if "" ~= buf then
-            tmp_tbl = {}
-            tmp_tbl["entry_token"] = buf
-            
-            ok, json = pcall(sjson.encode, tmp_tbl)
+            tbl_token = {}
+            tbl_token["entry_token"] = buf 
+            tbl_qrcode = {}
+            tbl_qrcode["qrcode"] = tbl_token
+ 
+            ok, json = pcall(sjson.encode, tbl_qrcode)
             if ok then tcp_mod:send(json)
             end
 
             buf = ""
 
-            log_mod:print("send data :" .. json)
+            log_mod:print("send publish:" .. json)
         end
     end)
 

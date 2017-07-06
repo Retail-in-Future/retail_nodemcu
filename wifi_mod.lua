@@ -3,7 +3,6 @@
 local M, module = {}, ...
 _G[module] = M
 
-local config = require("config")
 
 function M:start()
     -- body

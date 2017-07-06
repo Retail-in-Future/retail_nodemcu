@@ -3,7 +3,6 @@
 local M, module = {}, ...
 _G[module] = M
 
-local log_mod = require("log_mod")
 
 local debug_timer = nil
 local pin_esp8268, pin_board = 4, 0

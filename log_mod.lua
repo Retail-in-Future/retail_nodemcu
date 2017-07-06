@@ -3,7 +3,6 @@
 local M, module = {}, ...
 _G[module] = M
 
-local config = require("config")
 
 local file_name = "log.txt"
 local file_hdl = nil
